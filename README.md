@@ -25,7 +25,7 @@ I’m a results-driven **Data Analyst and Consultant** with expertise in **Pytho
 ---
 
 ## 📄 My Resume  
-[Check out my full resume here.](https://github.com/imadq/ImadQ-AnalyticsPortfolio/blob/main/Resume.pdf)
+[Check out my full resume here.](https://github.com/imadq/Consulting/blob/main/Resume.pdf)
 
 ---
 
