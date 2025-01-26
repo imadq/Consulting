@@ -36,4 +36,4 @@ I’m a results-driven **Data Scientist and Consultant** with expertise in **Pyt
 ## 📫 Let’s Connect  
 I’m open to collaborations, consulting opportunities, or technical projects. Reach out to discuss how I can help transform your data into powerful business strategies:  
 - **Email**: [imadqureshi2@gmail.com](mailto:imadqureshi2@gmail.com)  
-- **LinkedIn**: [linkedin.com/in/imad-q](#)
+- **LinkedIn**: [linkedin.com/in/imad-q](https://www.linkedin.com/in/imad-qureshi-811854208/)
