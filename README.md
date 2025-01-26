@@ -1,9 +1,13 @@
 # 👋 Hi, I’m Imad Q. – Data Analytics Consultant 🚀
 
-I’m a results-driven **Data Analyst and Consultant** with expertise in **Python**, **Power BI**, and **data automation**. With experience in **e-commerce**, **finance**, and **healthcare**, I specialize in:
-- Building **scalable ETL pipelines**.
-- Automating workflows with Python scripting, APIs, and Excel VBA/macros.
-- Delivering actionable insights through **advanced dashboards**.
+I’m a results-driven **Data Scientist and Consultant** with expertise in **Python**, **Power BI**, and **data automation**. With proven experience implementing **data analysis solutions** across two companies, I specialize in:
+- Building **scalable ETL pipelines** using tools like Python, SQL, and BigQuery to transform raw data into actionable insights.
+- Automating workflows with **Python scripting**, APIs, and Excel VBA/macros to improve operational efficiency.
+- Designing and maintaining **data warehouses** and integrating cross-platform data from systems like Salesforce and Google Analytics.
+- Delivering **custom dashboards** and interactive visualizations using Power BI, Tableau, and Google Data Studio to track KPIs and support decision-making.
+- Developing **predictive analytics models** for revenue forecasting and customer segmentation using machine learning libraries such as scikit-learn and pandas.
+- Implementing **web scraping and API integrations** to automate data collection and provide real-time insights for e-commerce and operational performance.
+- Leveraging cloud platforms like **Azure Data Factory** and virtual machines to support data processing and deployment at scale.
 
 ---
 
