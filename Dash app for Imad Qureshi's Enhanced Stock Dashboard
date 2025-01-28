@@ -1,0 +1,343 @@
+import yfinance as yf
+import dash
+import dash_bootstrap_components as dbc
+from dash import dcc, html, Input, Output, dash_table
+import pandas as pd
+
+# --------------------------------
+# 1. Configuration
+# --------------------------------
+TICKERS = [
+    "AAPL", "MSFT", "GOOGL", "AMZN", "META",
+    "TSLA", "NVDA", "NFLX", "ADBE", "AMD",
+    "SHOP", "CRM", "ORCL", "IBM", "PYPL"
+]
+
+def fetch_stock_data(tickers):
+    return yf.download(tickers, period="1y", interval="1d", group_by="ticker")
+
+def calculate_metrics(data):
+    metrics = {}
+    for ticker in TICKERS:
+        df = data[ticker]
+        growth = (df["Adj Close"].iloc[-1] - df["Adj Close"].iloc[0]) / df["Adj Close"].iloc[0] * 100
+        current_price = df["Adj Close"].iloc[-1]
+        high_52w = df["High"].max()
+        low_52w = df["Low"].min()
+        avg_vol = df["Volume"].mean()
+
+        metrics[ticker] = {
+            "Growth (%)": round(growth, 2),
+            "Price": round(current_price, 2),
+            "52W High": round(high_52w, 2),
+            "52W Low": round(low_52w, 2),
+            "Avg Volume": f"{round(avg_vol / 1e6, 1)}M"
+        }
+    return pd.DataFrame(metrics).T.sort_values("Growth (%)", ascending=False)
+
+# --------------------------------
+# 2. Fetch & Prepare Data
+# --------------------------------
+data = fetch_stock_data(TICKERS)
+metrics_df = calculate_metrics(data)
+
+top_5_stocks = metrics_df.head(5).index.tolist()   # For bar chart
+top_10_stocks = metrics_df.head(10).index.tolist() # For table
+
+# --------------------------------
+# 3. Dash App Setup
+# --------------------------------
+external_stylesheets = [dbc.themes.DARKLY]
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+# Centered title in the navbar
+navbar = dbc.NavbarSimple(
+    brand="Imad Qureshi's Enhanced Stock Dashboard",
+    brand_href="#",
+    color="primary",
+    dark=True,
+    className="mb-4",
+    brand_style={"margin": "0 auto", "fontSize": "1.2rem"}
+)
+
+# Fixed card height for consistent visuals
+CARD_HEIGHT = 420
+BASE_CARD_STYLE = {
+    "borderRadius": "10px",
+    "boxShadow": "0 2px 5px rgba(0,0,0,0.2)",
+    "margin": "10px",
+    "padding": "15px",
+    "height": f"{CARD_HEIGHT}px",
+}
+
+# Table scroll area
+TABLE_STYLE = {
+    "height": "250px",
+    "overflowY": "auto"
+}
+
+# Chart style with increased height
+GRAPH_STYLE = {
+    "height": "340px",
+    "width": "100%"
+}
+
+# --------------------------------
+# 4. Layout (Using Multiple Breakpoints)
+# --------------------------------
+app.layout = dbc.Container(
+    fluid=True,
+    style={"maxWidth": "1400px", "margin": "0 auto"},
+    children=[
+        navbar,
+
+        # -------------------- Dropdown Row --------------------
+        dbc.Row([
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody([
+                        html.H4("Select a Ticker", className="text-center"),
+                        dcc.Dropdown(
+                            id="ticker-dropdown",
+                            options=[{"label": t, "value": t} for t in TICKERS],
+                            value=top_5_stocks[0],  # Default ticker
+                            clearable=False,
+                            style={"color": "black"}
+                        ),
+                    ]),
+                    style={
+                        "borderRadius": "10px",
+                        "boxShadow": "0 2px 5px rgba(0,0,0,0.2)",
+                        "margin": "10px",
+                        "padding": "15px"
+                    }
+                ),
+                xs=12, sm=12, md=12, lg=12
+            )
+        ], className="mb-2"),
+
+        # -------------------- Row 1: Top 10 Table (L), Bar Chart (R) --------------------
+        dbc.Row([
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody([
+                        html.H5("Top 10 Performers", className="text-center mb-3"),
+                        dash_table.DataTable(
+                            id="growth-table",
+                            columns=[
+                                {"name": "Ticker", "id": "Ticker"},
+                                {"name": "Growth (%)", "id": "Growth (%)"},
+                                {"name": "Price", "id": "Price"},
+                            ],
+                            data=(
+                                metrics_df.reset_index()
+                                .rename(columns={"index": "Ticker"})
+                                .head(10)
+                                .to_dict("records")
+                            ),
+                            style_table=TABLE_STYLE,
+                            page_size=5,
+                            style_header={
+                                "fontWeight": "bold",
+                                "backgroundColor": "#343a40",
+                                "color": "white"
+                            },
+                            style_cell={
+                                "textAlign": "center",
+                                "backgroundColor": "#3e444a",
+                                "color": "white"
+                            },
+                            style_data_conditional=[
+                                {
+                                    "if": {"row_index": "odd"},
+                                    "backgroundColor": "#2b2f34"
+                                }
+                            ],
+                        )
+                    ]),
+                    style=BASE_CARD_STYLE
+                ),
+                xs=12, sm=12, md=6, lg=6  # Stacks on smaller screens
+            ),
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody([
+                        html.H5("Performance Comparison (Top 5)", className="text-center mb-3"),
+                        dcc.Graph(
+                            id="growth-bar-chart",
+                            figure={
+                                "data": [{
+                                    "x": top_5_stocks,
+                                    "y": metrics_df.loc[top_5_stocks]["Growth (%)"],
+                                    "type": "bar",
+                                    "marker": {"color": "#00bc8c"}
+                                }],
+                                "layout": {
+                                    "plot_bgcolor": "rgba(0,0,0,0)",
+                                    "paper_bgcolor": "rgba(0,0,0,0)",
+                                    "font": {"color": "white"},
+                                    "xaxis": {"title": "Ticker"},
+                                    "yaxis": {"title": "Growth (%)"}
+                                }
+                            },
+                            style=GRAPH_STYLE
+                        )
+                    ]),
+                    style=BASE_CARD_STYLE
+                ),
+                xs=12, sm=12, md=6, lg=6
+            )
+        ], className="mb-2"),
+
+        # -------------------- Row 2: Price Analysis (L), Key Metrics (R) --------------------
+        dbc.Row([
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody([
+                        html.H5("Price Analysis", className="text-center mb-3"),
+                        dcc.Graph(id="price-chart", style=GRAPH_STYLE)
+                    ]),
+                    style=BASE_CARD_STYLE
+                ),
+                xs=12, sm=12, md=6, lg=6
+            ),
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody([
+                        html.H5("Key Metrics", className="text-center mb-3"),
+                        html.Div(id="metrics-display", className="mb-2"),
+                        dash_table.DataTable(
+                            id="price-volume-table",
+                            columns=[
+                                {"name": "Date", "id": "Date"},
+                                {"name": "Price", "id": "Price"},
+                                {"name": "Volume", "id": "Volume"},
+                            ],
+                            style_table=TABLE_STYLE,
+                            page_size=5,
+                            style_header={
+                                "fontWeight": "bold",
+                                "backgroundColor": "#343a40",
+                                "color": "white"
+                            },
+                            style_cell={
+                                "textAlign": "center",
+                                "backgroundColor": "#3e444a",
+                                "color": "white"
+                            },
+                            style_data_conditional=[
+                                {
+                                    "if": {"row_index": "odd"},
+                                    "backgroundColor": "#2b2f34"
+                                }
+                            ],
+                        )
+                    ]),
+                    style=BASE_CARD_STYLE
+                ),
+                xs=12, sm=12, md=6, lg=6
+            )
+        ])
+    ]
+)
+
+# --------------------------------
+# 5. Bottom Row Callback
+# --------------------------------
+@app.callback(
+    [
+        Output("price-chart", "figure"),
+        Output("metrics-display", "children"),
+        Output("price-volume-table", "data")
+    ],
+    [Input("ticker-dropdown", "value")]
+)
+def update_bottom_row(selected_ticker):
+    # Price & Volume
+    stock_prices = data[selected_ticker]["Adj Close"]
+    volume_data = data[selected_ticker]["Volume"]
+    ma_50 = stock_prices.rolling(window=50).mean()
+
+    # Price Chart
+    price_fig = {
+        "data": [
+            {
+                "x": stock_prices.index,
+                "y": stock_prices.values,
+                "type": "line",
+                "name": "Price",
+                "marker": {"color": "#17a2b8"}
+            },
+            {
+                "x": ma_50.index,
+                "y": ma_50.values,
+                "type": "line",
+                "name": "50-Day MA",
+                "line": {"dash": "dot", "color": "#dc3545"}
+            }
+        ],
+        "layout": {
+            "title": f"{selected_ticker} Price Analysis (1Y)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "font": {"color": "white"},
+            "xaxis": {"title": "Date"},
+            "yaxis": {"title": "Price (USD)"},
+            "legend": {"orientation": "h", "y": -0.2}
+        }
+    }
+
+    # Key Metrics (4 mini-cards)
+    row = metrics_df.loc[selected_ticker]
+    card_price = dbc.Col(
+        dbc.Card(
+            dbc.CardBody([
+                html.H6("Current Price", className="text-muted"),
+                html.H5(f"${row['Price']}", className="text-success")
+            ]), color="dark", className="text-center"
+        ), width=6, lg=3
+    )
+    card_52w_high = dbc.Col(
+        dbc.Card(
+            dbc.CardBody([
+                html.H6("52W High", className="text-muted"),
+                html.H5(f"${row['52W High']}", className="text-warning")
+            ]), color="dark", className="text-center"
+        ), width=6, lg=3
+    )
+    card_52w_low = dbc.Col(
+        dbc.Card(
+            dbc.CardBody([
+                html.H6("52W Low", className="text-muted"),
+                html.H5(f"${row['52W Low']}", className="text-danger")
+            ]), color="dark", className="text-center"
+        ), width=6, lg=3
+    )
+    card_volume = dbc.Col(
+        dbc.Card(
+            dbc.CardBody([
+                html.H6("Avg Volume", className="text-muted"),
+                html.H5(row['Avg Volume'], className="text-info")
+            ]), color="dark", className="text-center"
+        ), width=6, lg=3
+    )
+
+    metrics_row = dbc.Row([card_price, card_52w_high, card_52w_low, card_volume], className="g-2")
+
+    # Price/Volume Table
+    table_data = [
+        {
+            "Date": str(date.date()),
+            "Price": round(price, 2),
+            "Volume": f"{round(vol / 1e6, 1)}M"
+        }
+        for date, price, vol in zip(stock_prices.index, stock_prices.values, volume_data.values)
+    ]
+
+    return price_fig, metrics_row, table_data
+
+# --------------------------------
+# 6. Main
+# --------------------------------
+if __name__ == "__main__":
+    app.run_server(debug=True)
