@@ -22,7 +22,7 @@ I’m a results-driven **Data Scientist and Consultant** with expertise in **Pyt
 ---
 
 ## 🔧 Technical Expertise  
-- **Languages**: Python, SQL, R  
+- **Languages**: Python, SQL, R, VBA
 - **Tools**: Power BI (PL-300 Certified), Tableau, BigQuery, Google Analytics  
 - **Cloud Platforms**: Azure Data Factory, Virtual Machines  
 
