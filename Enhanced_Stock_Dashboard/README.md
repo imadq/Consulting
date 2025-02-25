@@ -16,4 +16,20 @@ The **Enhanced Stock Dashboard** is a **real-time stock market analysis tool** d
 - **Data Source:** Yahoo Finance API  
 - **Other Tools:** HTML/CSS (for dashboard styling)  
 
-## 📂 Project Structure
+## 🖼️ Screenshots & Demo
+![Python Dashboard Using Yahoo Finance](https://github.com/user-attachments/assets/0a111699-f812-4943-8d1b-1e25a488e773)
+
+
+## 📌 Future Improvements
+- Add **stock sentiment analysis** using AI/ML models.  
+- Implement **real-time alerts** for significant stock price movements.  
+- Expand support for **more financial indicators and metrics.**  
+
+## 📬 Contact
+For inquiries or collaborations, feel free to reach out:  
+📩 **Email:** Imadqureshi2@gmail.com  
+📍 **LinkedIn:** [Your LinkedIn Profile](https://www.linkedin.com/in/imadq)  
+
+---
+
+**Let’s optimize stock analysis with automation and data-driven insights.** 🚀
